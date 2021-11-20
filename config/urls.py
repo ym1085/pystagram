@@ -19,5 +19,6 @@ from django.urls import path, include
 # 1차 URL, 어드민, 그냥 들어온 경우
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("photo.urls"))
+    path('accounts/', include("accounts.urls")),
+    path('', include("photo.urls")),
 ]
