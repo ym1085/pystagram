@@ -12,11 +12,12 @@ class PhotoList(ListView):
 # Create
 class PhotoCreate(CreateView):
     model = Photo
-    fields = ['author', 'text', 'image']
+    fields = ['text', 'image']
     template_name_suffix = '_create'
     success_url = '/'
 
-    def from_valid(self, form):
+    def form_valid(self, form):
+        print("from_valid = {0}".format(form.instance.author_id))
         form.instance.author_id = self.request.user.id
         if form.is_valid():
             form.instance.save()
@@ -27,7 +28,7 @@ class PhotoCreate(CreateView):
 # Update
 class PhotoUpdate(UpdateView):
     model = Photo
-    fields = ['author', 'text', 'image']
+    fields = ['text', 'image']
     template_name_suffix = '_update'
     success_url = '/'
 
