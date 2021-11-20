@@ -1,6 +1,9 @@
+from urllib.parse import urlparse
+
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.views import View
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
@@ -59,3 +62,43 @@ class PhotoDelete(DeleteView):
 class PhotoDetail(DetailView):
     model = Photo
     template_name_suffix = '_detail'
+
+class PhotoLike(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
+        else:
+            if 'photo_id' in kwargs:
+                photo_id = kwargs['photo_id']
+                photo = Photo.objects.get(pk=photo_id) # DB에서 photo_id에 맞는 값을 가져온다
+                user = request.user # 현재 좋아요 클릭한 유저
+                if user in photo.like.all():
+                    photo.like.remove(user)
+                else:
+                    photo.like.add(user)
+
+            referer_url = request.META.get("HTTP_REFERER") # URL을 읽어온다
+            path = urlparse(referer_url).path # 파싱 후 path 획득
+            return HttpResponseRedirect(path) # 다시 해당 path로 이동 (JS로 구현 가능)
+
+class PhotoFavorite(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden() # 403 Forbidden
+        else:
+            if 'photo_id' in kwargs:
+                photo_id = kwargs['photo_id']
+                photo = Photo.objects.get(pk=photo_id)
+                user = request.user
+                if user in photo.favorite.all():
+                    photo.favorite.remove(user)
+                else:
+                    photo.favorite.add(user)
+
+            referer_url = request.META.get("HTTP_REFERER")
+            path = urlparse(referer_url).path
+            return HttpResponseRedirect(path)
+
+
+
+
